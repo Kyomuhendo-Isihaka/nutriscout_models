@@ -182,6 +182,7 @@ def predict():
 
         # Retrieve location (if available)
         location = data.get('location', 'Unknown location')  
+        print(location)
 
         if 'image' not in data:
             return jsonify({"error": "Missing image data"}), 400
@@ -201,8 +202,10 @@ def predict():
             region = "Western"
         elif 'Eastern' in location:
             region = "Eastern"
+        elif 'Northern' in location:
+            region = "Nortern"
         else:
-            region = "Northern"
+            region = "Not Anemic"
     
 
         # Interpret result and recommendation
