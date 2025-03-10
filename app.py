@@ -147,29 +147,60 @@ def preprocess_image(img):
 def get_recommendation_for_region(region):
     recommendations = {
         "Central": (
-            "Child should consume more iron-rich foods such as fish, beans, leafy greens like dodo, and liver to boost their blood levels. "
-            "Iron absorption is improved by taking these foods with vitamin C sources such as oranges, mangoes, and passion fruits. "
-            "If a child frequently looks pale or weak, seek medical advice to check for anemia and possible supplementation."
+            "🌿 Central Uganda: Nourishing Your Child for Stronger Blood 🌿\n\n"
+            "A well-balanced diet rich in iron is essential for your child's growth and energy levels. Here’s a simple yet powerful meal plan to help fight anemia:\n\n"
+            "🍲 Monday: Warm millet porridge (½ cup) enriched with peanut paste (1 tbsp), followed by rice (½ cup) with tender fish (50g) and steamed dodo (¼ cup).\n"
+            "🍛 Tuesday:Start with a boiled egg (1) and whole wheat bread (1 slice) with fresh milk (½ cup). Later, enjoy matoke (½ cup) with nutrient-packed beef liver (40g) and steamed spinach (¼ cup).\n"
+            "🥣 Wednesday: Hearty sorghum porridge (½ cup) paired with milk (½ cup), millet bread (1 small piece) with grilled fish (50g), and steamed cowpea leaves (¼ cup).\n"
+            "🌽 Thursday: Boiled sweet potatoes (1 small) with milk (½ cup), complemented by rice (½ cup) with flavorful chicken liver (40g) and steamed greens (¼ cup).\n"
+            "🍛 Friday: A rich millet porridge (½ cup) with peanut paste (1 tbsp), posho (½ cup) served with crispy dry fish (50g), and iron-boosting amaranth greens (¼ cup).\n"
+            "🥚 Saturday: A nutritious boiled egg (1) with tea and whole wheat bread (1 slice), followed by rice (½ cup) with succulent beef liver (50g) and steamed spinach (¼ cup).\n"
+            "🍌 Sunday: Comforting sorghum porridge (½ cup) with milk (½ cup), accompanied by matoke (½ cup) in rich groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n\n"
+            "If a child frequently looks pale or weak, seek medical advice to check for anemia and possible supplements.\n\n"
+            "💡 Pro Tip: Enhance iron absorption by pairing these meals with vitamin C-rich fruits like mangoes, oranges, or passion fruit juice! "
         ),
         "Western": (
-            "To prevent and manage anemia, children should eat milk, eggs, beef liver, beans, and dark leafy greens like spinach. "
-            "Consuming iron-rich meals with fresh fruits like guavas and pineapples enhances iron absorption. "
-            "Regular deworming and malaria prevention are also important in this region, as parasites can cause anemia. "
-            "If signs of severe tiredness or dizziness persist, visit a healthcare facility for blood tests and treatment."
+            "🐄 Western Uganda: Boosting Energy & Blood Strength🐄\n\n"
+            "Western Uganda's rich food diversity offers excellent iron sources to keep your child strong and healthy. Follow this meal plan for a week of nourishment:\n\n"
+            "🍵 Monday: Sorghum porridge (½ cup) with fresh milk (½ cup), then a hearty meal of rice (½ cup) with beef liver (50g) and steamed spinach (¼ cup).\n"
+            "🥚 Tuesday: Whole wheat bread (1 slice) with a boiled egg (1) and fresh milk (½ cup), followed by millet bread (1 small piece) with dry fish (50g) and greens (¼ cup).\n"
+            "🍠 Wednesday: Sweet potatoes (1 small) with peanut paste (1 tbsp), then matoke (½ cup) with groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n"
+            "🌾 Thursday:Iron-rich millet porridge (½ cup) with peanut paste (1 tbsp), paired with rice (½ cup), beef (50g), and steamed spinach (¼ cup).\n"
+            "🍚 Friday: Sorghum porridge (½ cup) with fresh milk (½ cup), followed by posho (½ cup) with crispy dry fish (50g) and greens (¼ cup).\n"
+            "🥩 Saturday: Whole wheat bread (1 slice) with tea, then matoke (½ cup) with protein-packed groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n"
+            "🥛 Sunday: Sweet potatoes (1 small) with milk (½ cup), then rice (½ cup) with delicious beef liver (50g) and steamed spinach (¼ cup).\n\n"
+            "If signs of severe tiredness or dizziness persist, visit a healthcare facility for blood tests and treatment.\n\n"
+            "💡 Health Tip: Regular deworming and malaria prevention will further support your child's iron levels and overall health! "
         ),
         "Eastern": (
-            "Including groundnuts, beans, and millet porridge in a child’s diet helps combat anemia. Fresh vegetables such as dodo and pumpkin leaves provide additional iron and folic acid. "
-            "If a child remains weak and unresponsive to diet changes, consult a health worker for further evaluation."
+            "🌾 Eastern Uganda: Fighting Anemia with Every Bite🌾\n\n"
+            "Ensure your child stays strong and active with this weekly meal plan designed for iron-rich nourishment:\n\n"
+            "🍲 Monday: Millet porridge (½ cup) with groundnut paste (1 tbsp), followed by rice (½ cup) with beans (¼ cup) and steamed pumpkin leaves (¼ cup).\n"
+            "🥚 Tuesday: A wholesome boiled egg (1) with whole wheat bread (1 slice) and fresh milk (½ cup), then sweet potatoes (½ cup) with fish (50g) and dodo (¼ cup).\n"
+            "🍵 Wednesday:Sorghum porridge (½ cup) with milk (½ cup), followed by posho (½ cup) with groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n"
+            "🍠 Thursday:Boiled sweet potatoes (1 small) with peanut paste (1 tbsp), then matoke (½ cup) with beans (¼ cup) and tamarind juice (½ cup).\n"
+            "🥣 Friday:Millet porridge (½ cup) with peanut paste (1 tbsp), complemented by rice (½ cup) with dry fish (50g) and steamed cowpea leaves (¼ cup).\n"
+            "🍞 Saturday: Whole wheat bread (1 slice) with tea, followed by millet bread (1 small piece) with beans (¼ cup) and steamed greens (¼ cup).\n"
+            "🍛 Sunday: Boiled sweet potatoes (1 small) with milk (½ cup), then brown rice (½ cup) with fish (50g) and passion fruit juice (½ cup).\n\n"
+             "If a child remains weak and unresponsive to diet changes, consult a health worker for further evaluation.\n\n"
+            "💡 Health Boost: Always combine iron-rich meals with vitamin C sources like tamarind, oranges, or guavas for better absorption! "
         ),
         "Northern": (
-            "A diet rich in sorghum, goat meat, dry fish, and iron-rich vegetables like cowpea leaves can help fight anemia. "
-            "Drinking fresh fruit juices (such as orange or tamarind juice) alongside meals improves iron absorption. "
-            "Since infections like malaria and worm infestations contribute to anemia, regular deworming and malaria prevention are essential. "
-            "If a child remains fatigued, seek medical attention immediately."
+            "🐐 Northern Uganda: Strengthening Blood & Energy Levels🐐  \n\n"
+            "This carefully curated meal plan will rebuild your child’s strength** and improve iron levels:\n\n"
+            "🥣 Monday: Sorghum porridge (½ cup) with milk (½ cup), followed by rice (½ cup) with goat meat (50g) and steamed cowpea leaves (¼ cup).\n"
+            "🍠 Tuesday: A boiled egg (1) with whole wheat bread (1 slice) and fresh milk (½ cup), then sweet potatoes (½ cup) with fish (50g) and tamarind juice (½ cup).\n"
+            "🍵 Wednesday: Millet porridge (½ cup) with peanut paste (1 tbsp), followed by posho (½ cup) with beans (¼ cup) and steamed greens (¼ cup).\n"
+            "🍊 Thursday: Boiled sweet potatoes (1 small) with peanut paste (1 tbsp), then matoke (½ cup) with dry fish (50g) and orange juice (½ cup).\n"
+            "🥩 Friday: Sorghum porridge (½ cup) with milk (½ cup), followed by rice (½ cup) with beef liver (50g) and cowpea leaves (¼ cup).\n"
+            "🍞 Saturday: Whole wheat bread (1 slice) with tea, followed by millet bread (1 small piece) with groundnut sauce (2 tbsp) and greens (¼ cup).\n"
+            "🥛 Sunday: Boiled sweet potatoes (1 small) with milk (½ cup), then brown rice (½ cup) with fish (50g) and passion fruit juice (½ cup).\n\n"
+            "If a child remains fatigued, seek medical attention immediately.\n\n"
+            "💡 Proactive Tip: Prevent anemia by ensuring regular deworming and malaria prevention! "
         ),
         "Not Anemic": (
-            "Although your child is not anemic, maintaining a balanced diet with iron-rich foods like beans, fish, and leafy greens, alongside vitamin C sources such as oranges and mangoes, will help prevent future deficiencies."
-        ),
+           "Although your child is not anemic, maintaining a balanced diet with iron-rich foods like beans, fish, and leafy greens, alongside vitamin C sources such as oranges and mangoes, will help prevent future deficiencies."
+      ),
     }
     
     return recommendations.get(region, "Region not recognized. Please provide a valid region.")
