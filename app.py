@@ -277,14 +277,14 @@ def get_nutrition_recommendations():
         
         Determine weight status and region-based recommendation
         if weight < 5:
-          weight_status = "Underweight"
-           weight_recommendation = region_recommendations[location]["Underweight"]
+            weight_status = "Underweight"
+            weight_recommendation = region_recommendations[location]["Underweight"]
         elif weight > 10:
-           weight_status = "Overweight"
-           weight_recommendation = "Focus on a balanced diet with controlled calorie intake."
+            weight_status = "Overweight"
+            weight_recommendation = "Focus on a balanced diet with controlled calorie intake."
         else:
-           weight_status = "Normal Weight"
-           weight_recommendation = "Maintain a healthy diet and lifestyle."
+            weight_status = "Normal Weight"
+            weight_recommendation = "Maintain a healthy diet and lifestyle."
 
 
         # Determine wasting status and region-based recommendation
