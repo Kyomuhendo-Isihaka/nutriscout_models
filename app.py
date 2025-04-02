@@ -17,32 +17,197 @@ data.columns = ['AGE', 'BOYS_MEDIAN_HEIGHT', 'BOYS_SD_HEIGHT', 'GIRLS_MEDIAN_HEI
 data = data.drop([0, 1])
 data.reset_index(drop=True, inplace=True)
 
-# Region-based recommendations
+# # Region-based recommendations
+# region_recommendations = {
+#     "Central": {
+#         "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
+#         "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
+#         "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
+#     },
+#     "Western": {
+#         "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
+#         "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
+#         "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
+#     },
+#     "Eastern": {
+#         "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
+#         "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
+#         "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
+#     },
+#     "Northern": {
+#         "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
+#         "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
+#         "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
+#     }
+# }
+
+# Region-based food recommendations and a 7-day meal plan
 region_recommendations = {
     "Central": {
-        "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
-        "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
-        "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
+        "Stunting": {
+            "recommendation": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
+            "weeklyPlan": {
+                "Day 1": "Millet porridge with milk and groundnuts, boiled eggs, and a piece of fruit.",
+                "Day 2": "Mashed sweet potatoes with avocado, fish stew with vegetables.",
+                "Day 3": "Beans and rice, steamed vegetables, boiled matoke (plantain).",
+                "Day 4": "Eggs with spinach, whole wheat bread, fruit salad.",
+                "Day 5": "Groundnut paste with millet porridge and carrots.",
+                "Day 6": "Vegetable soup with beans, maize, and avocados.",
+                "Day 7": "Fish stew with cassava, leafy greens, and fruits."
+            }
+        },
+        "Wasting": {
+            "recommendation": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
+            "weeklyPlan": {
+                "Day 1": "Full-fat milk with millet porridge, groundnut paste, and fruit.",
+                "Day 2": "Roasted groundnuts with banana, boiled sweet potatoes with butter.",
+                "Day 3": "High-energy porridge with added milk, boiled eggs, and avocado.",
+                "Day 4": "Full-fat milk with ghee, fried groundnuts, and mashed beans.",
+                "Day 5": "Groundnut paste with millet porridge, scrambled eggs, and fruit.",
+                "Day 6": "Sweet potatoes with avocado, full-fat milk, and roasted chicken.",
+                "Day 7": "Millet porridge with milk, groundnut paste, and fresh fruit."
+            }
+        },
+        "Underweight": {
+            "recommendation": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist.",
+            "weeklyPlan": {
+                "Day 1": "Peanut butter sandwich, full-fat milk, and a fruit.",
+                "Day 2": "Sweet potatoes with groundnut sauce, fruit salad.",
+                "Day 3": "Boiled beans with avocado, a glass of milk.",
+                "Day 4": "Roast chicken with mashed potatoes and avocado.",
+                "Day 5": "Avocado toast with a boiled egg, full-fat milk.",
+                "Day 6": "Groundnut paste with millet porridge, bananas.",
+                "Day 7": "Rice with beans and avocado, fruit juice."
+            }
+        }
     },
     "Western": {
-        "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
-        "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
-        "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
+        "Stunting": {
+            "recommendation": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
+            "weeklyPlan": {
+                "Day 1": "Millet bread with groundnut paste, boiled eggs, and fruit.",
+                "Day 2": "Beef stew with rice, leafy greens, and a glass of milk.",
+                "Day 3": "Fish with cassava, avocado, and steamed vegetables.",
+                "Day 4": "Beans and maize, avocado, and banana.",
+                "Day 5": "Beef stew with millet bread, spinach.",
+                "Day 6": "Eggs with tomatoes, bread, and orange juice.",
+                "Day 7": "Rice with peas, milk, and carrots."
+            }
+        },
+        "Wasting": {
+            "recommendation": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
+            "weeklyPlan": {
+                "Day 1": "Millet porridge with ghee, full-fat milk, and roasted groundnuts.",
+                "Day 2": "Sweet potatoes with avocado, groundnut paste, and bananas.",
+                "Day 3": "Full-fat milk with millet porridge, scrambled eggs.",
+                "Day 4": "Porridge with groundnuts, roasted chicken, and fruit.",
+                "Day 5": "Ghee with porridge, boiled eggs, and mango.",
+                "Day 6": "Roasted groundnuts with banana, full-fat milk, and millet bread.",
+                "Day 7": "Groundnut paste with porridge, avocado, and fruit."
+            }
+        },
+        "Underweight": {
+            "recommendation": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption.",
+            "weeklyPlan": {
+                "Day 1": "Chicken with rice, avocado, and full-fat milk.",
+                "Day 2": "Beans and avocado, boiled egg, fresh fruit.",
+                "Day 3": "Beef stew with potatoes, avocado, and milk.",
+                "Day 4": "Eggs with beans, millet porridge with milk.",
+                "Day 5": "Chicken stew with rice and vegetables, banana.",
+                "Day 6": "Groundnut paste with sweet potatoes, avocado.",
+                "Day 7": "Rice with beans, avocado, and fruit juice."
+            }
+        }
     },
     "Eastern": {
-        "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
-        "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
-        "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
+        "Stunting": {
+            "recommendation": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
+            "weeklyPlan": {
+                "Day 1": "Millet porridge with groundnut paste, steamed vegetables, and fish.",
+                "Day 2": "Rice with fish and vegetables, boiled eggs.",
+                "Day 3": "Beans with avocado, fruit salad.",
+                "Day 4": "Boiled sweet potatoes, groundnut paste, and leafy greens.",
+                "Day 5": "Fish stew with cassava and vegetables.",
+                "Day 6": "Rice with beans, boiled eggs, and fruit.",
+                "Day 7": "Groundnut paste with millet porridge, boiled chicken."
+            }
+        },
+        "Wasting": {
+            "recommendation": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
+            "weeklyPlan": {
+                "Day 1": "Fish with energy-rich porridge, full-fat milk, and fruit.",
+                "Day 2": "Millet porridge with groundnut paste, bananas.",
+                "Day 3": "Sweet potatoes with avocado, milk, and fruits.",
+                "Day 4": "Groundnut paste with porridge, fresh fruit, and eggs.",
+                "Day 5": "Millet porridge with groundnuts, boiled chicken.",
+                "Day 6": "High-energy porridge with milk, roasted groundnuts, and fruit.",
+                "Day 7": "Fish stew with cassava, vegetables, and milk."
+            }
+        },
+        "Underweight": {
+            "recommendation": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health.",
+            "weeklyPlan": {
+                "Day 1": "Rice with beans and avocado, fruit.",
+                "Day 2": "Cassava with groundnut paste, fruit juice.",
+                "Day 3": "Steamed beans with sweet potatoes and avocado.",
+                "Day 4": "Rice with beans and avocado, full-fat milk.",
+                "Day 5": "Fried groundnuts with cassava, banana.",
+                "Day 6": "Beans with rice, vegetables, and fruit.",
+                "Day 7": "Groundnut paste with porridge, avocado, and fruit."
+            }
+        }
     },
     "Northern": {
-        "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
-        "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
-        "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
+        "Stunting": {
+            "recommendation": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
+            "weeklyPlan": {
+                "Day 1": "Sorghum bread with groundnut paste, goat meat stew.",
+                "Day 2": "Rice with goat meat and vegetables.",
+                "Day 3": "Beans with cassava, avocado, and fruit.",
+                "Day 4": "Steamed beans with sorghum bread, avocado.",
+                "Day 5": "Goat meat stew with vegetables, rice.",
+                "Day 6": "Sorghum porridge with groundnuts, avocado.",
+                "Day 7": "Goat meat with vegetables, sorghum bread."
+            }
+        },
+        "Wasting": {
+            "recommendation": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
+            "weeklyPlan": {
+                "Day 1": "Sorghum porridge with groundnut paste, dry fish.",
+                "Day 2": "Sorghum porridge with sim-sim, boiled eggs.",
+                "Day 3": "Groundnut paste with cassava, bananas.",
+                "Day 4": "Sim-sim with rice, fruit.",
+                "Day 5": "Sorghum bread with groundnuts, boiled eggs.",
+                "Day 6": "Groundnut paste with millet, fish.",
+                "Day 7": "Sorghum porridge with milk, fruit."
+            }
+        },
+        "Underweight": {
+            "recommendation": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice.",
+            "weeklyPlan": {
+                "Day 1": "Goat meat stew with rice, avocado.",
+                "Day 2": "Beans with cassava, avocado, and fruit.",
+                "Day 3": "Roasted chicken with millet porridge and vegetables.",
+                "Day 4": "Goat meat with sweet potatoes, full-fat milk.",
+                "Day 5": "Rice with beans, avocado, and fresh fruit.",
+                "Day 6": "Groundnut paste with millet porridge, chicken.",
+                "Day 7": "Cassava with groundnut paste, fresh fruit."
+            }
+        }
     }
 }
 
+
+
 def calculate_z_score(value, median, sd):
     return (value - median) / sd
+
+#change# Function to calculate BMI (Body Mass Index)
+def calculate_bmi(weight, height):
+    # BMI = weight(kg) / height(m)^2
+    height_m = height / 100  # Convert height from cm to meters
+    bmi = weight / (height_m ** 2)
+    return bmi
 
 @app.route('/get_nutrition_recommendations', methods=['POST'])
 def get_nutrition_recommendations():
@@ -81,6 +246,8 @@ def get_nutrition_recommendations():
         # Calculate Z-score for height
         height_z = calculate_z_score(height, median_height, sd_height)
 
+        
+
         # Determine height status and region-based recommendation
         if height_z < -2:
             height_status = "Stunted Growth"
@@ -92,16 +259,33 @@ def get_nutrition_recommendations():
             height_status = "Above Average Growth"
             height_recommendation = "Ensure a healthy diet and active lifestyle."
 
-        # Determine weight status and region-based recommendation
-        if weight < 5:
+        
+         # Change #Calculate BMI to determine underweight or overweight
+        bmi = calculate_bmi(weight, height)
+        
+         #chnage# Determine weight status (underweight, normal weight, or overweight) based on BMI
+        if bmi < 18.5:
             weight_status = "Underweight"
             weight_recommendation = region_recommendations[location]["Underweight"]
-        elif weight > 10:
+        elif bmi >= 25:
             weight_status = "Overweight"
             weight_recommendation = "Focus on a balanced diet with controlled calorie intake."
         else:
             weight_status = "Normal Weight"
-            weight_recommendation = "Maintain a healthy diet and lifestyle."
+        
+        
+        
+        #Determine weight status and region-based recommendation
+        #if weight < 5:
+        #   weight_status = "Underweight"
+         #   weight_recommendation = region_recommendations[location]["Underweight"]
+        #elif weight > 10:
+         #   weight_status = "Overweight"
+          #  weight_recommendation = "Focus on a balanced diet with controlled calorie intake."
+        #else:
+         #   weight_status = "Normal Weight"
+          #  weight_recommendation = "Maintain a healthy diet and lifestyle."
+
 
         # Determine wasting status and region-based recommendation
         if height_z < -3:
@@ -117,6 +301,8 @@ def get_nutrition_recommendations():
             "Height Recommendation": height_recommendation,
             "Weight Nutritional Status": weight_status,
             "Weight Recommendation": weight_recommendation,
+            #change
+            "BMI": round(bmi, 2),
             "Wasting Status": wasting_status,
             "Wasting Recommendation": wasting_recommendation,
             "Region": location
@@ -124,140 +310,6 @@ def get_nutrition_recommendations():
 
     except Exception as e:
         return jsonify({"Error": str(e)}), 500
-
-
-
-# Load trained model
-model_path = 'palm_anemia_model.h5'
-if os.path.exists(model_path):
-    print("✅ Loading existing model...")
-    model = tf.keras.models.load_model(model_path)
-else:
-    raise FileNotFoundError(f"❌ Model file '{model_path}' not found! Train the model first.")
-
-# Function to preprocess image
-def preprocess_image(img):
-    img = img.resize((224, 224))  
-    img_array = np.array(img) / 255.0  
-    img_array = np.expand_dims(img_array, axis=0) 
-    return img_array
-
-
-# Recommendations based on region
-def get_recommendation_for_region(region):
-    recommendations = {
-        "Central": (
-            "🌿 Central Uganda: Nourishing Your Child for Stronger Blood 🌿\n\n"
-            "A well-balanced diet rich in iron is essential for your child's growth and energy levels. Here’s a simple yet powerful meal plan to help fight anemia:\n\n"
-            "🍲 Monday: Warm millet porridge (½ cup) enriched with peanut paste (1 tbsp), followed by rice (½ cup) with tender fish (50g) and steamed dodo (¼ cup).\n"
-            "🍛 Tuesday:Start with a boiled egg (1) and whole wheat bread (1 slice) with fresh milk (½ cup). Later, enjoy matoke (½ cup) with nutrient-packed beef liver (40g) and steamed spinach (¼ cup).\n"
-            "🥣 Wednesday: Hearty sorghum porridge (½ cup) paired with milk (½ cup), millet bread (1 small piece) with grilled fish (50g), and steamed cowpea leaves (¼ cup).\n"
-            "🌽 Thursday: Boiled sweet potatoes (1 small) with milk (½ cup), complemented by rice (½ cup) with flavorful chicken liver (40g) and steamed greens (¼ cup).\n"
-            "🍛 Friday: A rich millet porridge (½ cup) with peanut paste (1 tbsp), posho (½ cup) served with crispy dry fish (50g), and iron-boosting amaranth greens (¼ cup).\n"
-            "🥚 Saturday: A nutritious boiled egg (1) with tea and whole wheat bread (1 slice), followed by rice (½ cup) with succulent beef liver (50g) and steamed spinach (¼ cup).\n"
-            "🍌 Sunday: Comforting sorghum porridge (½ cup) with milk (½ cup), accompanied by matoke (½ cup) in rich groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n\n"
-            "If a child frequently looks pale or weak, seek medical advice to check for anemia and possible supplements.\n\n"
-            "💡 Pro Tip: Enhance iron absorption by pairing these meals with vitamin C-rich fruits like mangoes, oranges, or passion fruit juice! "
-        ),
-        "Western": (
-            "🐄 Western Uganda: Boosting Energy & Blood Strength🐄\n\n"
-            "Western Uganda's rich food diversity offers excellent iron sources to keep your child strong and healthy. Follow this meal plan for a week of nourishment:\n\n"
-            "🍵 Monday: Sorghum porridge (½ cup) with fresh milk (½ cup), then a hearty meal of rice (½ cup) with beef liver (50g) and steamed spinach (¼ cup).\n"
-            "🥚 Tuesday: Whole wheat bread (1 slice) with a boiled egg (1) and fresh milk (½ cup), followed by millet bread (1 small piece) with dry fish (50g) and greens (¼ cup).\n"
-            "🍠 Wednesday: Sweet potatoes (1 small) with peanut paste (1 tbsp), then matoke (½ cup) with groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n"
-            "🌾 Thursday:Iron-rich millet porridge (½ cup) with peanut paste (1 tbsp), paired with rice (½ cup), beef (50g), and steamed spinach (¼ cup).\n"
-            "🍚 Friday: Sorghum porridge (½ cup) with fresh milk (½ cup), followed by posho (½ cup) with crispy dry fish (50g) and greens (¼ cup).\n"
-            "🥩 Saturday: Whole wheat bread (1 slice) with tea, then matoke (½ cup) with protein-packed groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n"
-            "🥛 Sunday: Sweet potatoes (1 small) with milk (½ cup), then rice (½ cup) with delicious beef liver (50g) and steamed spinach (¼ cup).\n\n"
-            "If signs of severe tiredness or dizziness persist, visit a healthcare facility for blood tests and treatment.\n\n"
-            "💡 Health Tip: Regular deworming and malaria prevention will further support your child's iron levels and overall health! "
-        ),
-        "Eastern": (
-            "🌾 Eastern Uganda: Fighting Anemia with Every Bite🌾\n\n"
-            "Ensure your child stays strong and active with this weekly meal plan designed for iron-rich nourishment:\n\n"
-            "🍲 Monday: Millet porridge (½ cup) with groundnut paste (1 tbsp), followed by rice (½ cup) with beans (¼ cup) and steamed pumpkin leaves (¼ cup).\n"
-            "🥚 Tuesday: A wholesome boiled egg (1) with whole wheat bread (1 slice) and fresh milk (½ cup), then sweet potatoes (½ cup) with fish (50g) and dodo (¼ cup).\n"
-            "🍵 Wednesday:Sorghum porridge (½ cup) with milk (½ cup), followed by posho (½ cup) with groundnut sauce (2 tbsp) and steamed greens (¼ cup).\n"
-            "🍠 Thursday:Boiled sweet potatoes (1 small) with peanut paste (1 tbsp), then matoke (½ cup) with beans (¼ cup) and tamarind juice (½ cup).\n"
-            "🥣 Friday:Millet porridge (½ cup) with peanut paste (1 tbsp), complemented by rice (½ cup) with dry fish (50g) and steamed cowpea leaves (¼ cup).\n"
-            "🍞 Saturday: Whole wheat bread (1 slice) with tea, followed by millet bread (1 small piece) with beans (¼ cup) and steamed greens (¼ cup).\n"
-            "🍛 Sunday: Boiled sweet potatoes (1 small) with milk (½ cup), then brown rice (½ cup) with fish (50g) and passion fruit juice (½ cup).\n\n"
-             "If a child remains weak and unresponsive to diet changes, consult a health worker for further evaluation.\n\n"
-            "💡 Health Boost: Always combine iron-rich meals with vitamin C sources like tamarind, oranges, or guavas for better absorption! "
-        ),
-        "Northern": (
-            "🐐 Northern Uganda: Strengthening Blood & Energy Levels🐐  \n\n"
-            "This carefully curated meal plan will rebuild your child’s strength** and improve iron levels:\n\n"
-            "🥣 Monday: Sorghum porridge (½ cup) with milk (½ cup), followed by rice (½ cup) with goat meat (50g) and steamed cowpea leaves (¼ cup).\n"
-            "🍠 Tuesday: A boiled egg (1) with whole wheat bread (1 slice) and fresh milk (½ cup), then sweet potatoes (½ cup) with fish (50g) and tamarind juice (½ cup).\n"
-            "🍵 Wednesday: Millet porridge (½ cup) with peanut paste (1 tbsp), followed by posho (½ cup) with beans (¼ cup) and steamed greens (¼ cup).\n"
-            "🍊 Thursday: Boiled sweet potatoes (1 small) with peanut paste (1 tbsp), then matoke (½ cup) with dry fish (50g) and orange juice (½ cup).\n"
-            "🥩 Friday: Sorghum porridge (½ cup) with milk (½ cup), followed by rice (½ cup) with beef liver (50g) and cowpea leaves (¼ cup).\n"
-            "🍞 Saturday: Whole wheat bread (1 slice) with tea, followed by millet bread (1 small piece) with groundnut sauce (2 tbsp) and greens (¼ cup).\n"
-            "🥛 Sunday: Boiled sweet potatoes (1 small) with milk (½ cup), then brown rice (½ cup) with fish (50g) and passion fruit juice (½ cup).\n\n"
-            "If a child remains fatigued, seek medical attention immediately.\n\n"
-            "💡 Proactive Tip: Prevent anemia by ensuring regular deworming and malaria prevention! "
-        ),
-        "Not Anemic": (
-           "Although your child is not anemic, maintaining a balanced diet with iron-rich foods like beans, fish, and leafy greens, alongside vitamin C sources such as oranges and mangoes, will help prevent future deficiencies."
-      ),
-    }
-    
-    return recommendations.get(region, "Region not recognized. Please provide a valid region.")
-
-# Flask API endpoint for prediction
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        data = request.get_json()
-
-        # Retrieve location (if available)
-        location = data.get('location', 'Unknown location')  
-        print(location)
-
-        if 'image' not in data:
-            return jsonify({"error": "Missing image data"}), 400
-
-        # Decode Base64 image
-        image_data = base64.b64decode(data['image'])
-        img = Image.open(io.BytesIO(image_data))
-
-        # Preprocess and predict
-        img_array = preprocess_image(img)
-        prediction = model.predict(img_array)
-
-        # Determine the region (mocking for this example)
-        if 'Central' in location:
-            region = "Central"
-        elif 'Western' in location:
-            region = "Western"
-        elif 'Eastern' in location:
-            region = "Eastern"
-        elif 'Northern' in location:
-            region = "Nortern"
-        else:
-            region = "Not Anemic"
-    
-
-        # Interpret result and recommendation
-        if prediction < 0.5:  # Healthy
-            result = "No Anemia Detected"
-            recommendation = get_recommendation_for_region("Not Anemic")
-        else:  # Anemic
-            result = "Anemia Detected"
-            recommendation = get_recommendation_for_region(region)
-        
-        print(result)
-        print(recommendation)
-
-        return jsonify({
-            "classification": result,
-            "recommendation": recommendation,
-            "location": location  
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 
 
