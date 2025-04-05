@@ -474,12 +474,12 @@ def load_growth_data():
                          'GIRLS_MEDIAN_HEIGHT', 'GIRLS_SD_HEIGHT']
 
     # Load weight-for-age data (rows 67-127)
-    weight_data = pd.read_excel("dataset.xlsx", header=None, skiprows=68, nrows=61)
+    weight_data = pd.read_excel("dataset.xlsx", header=None, skiprows=67, nrows=61)
     weight_data.columns = ['AGE', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT',
                          'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
 
     # Load weight-for-height data (rows 131-231)
-    wfh_data = pd.read_excel("dataset.xlsx", header=None, skiprows=133, nrows=101)
+    wfh_data = pd.read_excel("dataset.xlsx", header=None, skiprows=132, nrows=101)
     
     # Split into gender-specific tables
     wfh_girls = wfh_data.iloc[:, :3].copy()
