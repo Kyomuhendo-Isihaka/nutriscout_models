@@ -253,7 +253,7 @@ def get_nutrition_recommendations():
         if height_z < -2:
             height_status = "Stunted Growth"
             height_recommendation = region_recommendations[location]["Stunting"]
-        elif -2 <= height_z <= 2:
+        elif -3 <= height_z <= 2:
             height_status = "Normal Growth"
             height_recommendation = "Maintain a balanced diet with a variety of nutrients."
         else:
@@ -265,10 +265,10 @@ def get_nutrition_recommendations():
          
         
          #chnage# Determine weight status (underweight, normal weight, or overweight) based on BMI
-        if bmi < 18.5:
+        if bmi < -3:
             weight_status = "Underweight"
             weight_recommendation = region_recommendations[location]["Underweight"]
-        elif bmi >= 25:
+        elif 1 <= bmi_z < 2:
             weight_status = "Overweight"
             weight_recommendation = "Focus on a balanced diet with controlled calorie intake."
         else:
