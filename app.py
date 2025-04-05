@@ -268,7 +268,7 @@ def get_nutrition_recommendations():
         if bmi < -3:
             weight_status = "Underweight"
             weight_recommendation = region_recommendations[location]["Underweight"]
-        elif 1 <= bmi_z < 2:
+        elif 1 <= bmi < 2:
             weight_status = "Overweight"
             weight_recommendation = "Focus on a balanced diet with controlled calorie intake."
         else:
