@@ -463,6 +463,7 @@ from flask import Flask, request, jsonify
 import pandas as pd
 import numpy as np
 
+
 app = Flask(__name__)
 
 # ====================== DATA LOADING ======================
@@ -659,7 +660,6 @@ def get_nutrition_recommendations():
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 # ====================== MAIN ======================
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=5000, debug=True)
+
 if __name__ == '__main__':
     app.run(debug=True)
