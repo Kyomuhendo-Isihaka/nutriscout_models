@@ -483,7 +483,7 @@ def load_growth_data():
     wfh_data = pd.read_excel("dataset.xlsx", header=None, skiprows=132, nrows=101)
     
     # Split into gender-specific tables
-    wfh_girls = wfh_data.iloc[:, :3].copy()
+    wfh_girls = wfh_data.iloc[:, 1:2].copy()
     wfh_girls.columns = ['HEIGHT', 'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
     
     wfh_boys = wfh_data.iloc[:, 3:].copy()
