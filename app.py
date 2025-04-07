@@ -486,13 +486,10 @@ def load_growth_data():
     wfh_girls = wfh_data.iloc[:, :3].copy()
     wfh_girls.columns = ['HEIGHT', 'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
     
-    wfh_boys = wfh_data.iloc[:, 2:].copy()
+    wfh_boys = wfh_data.iloc[:, 3:].copy()
     wfh_boys.columns = ['HEIGHT', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT']
     
-    print(wfh_boys.head())
-    print(wfh_boys.columns)
-
-
+   
     return {
         'height': height_data,
         'weight': weight_data,
