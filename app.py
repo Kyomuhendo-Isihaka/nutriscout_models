@@ -1,3 +1,538 @@
+
+
+from flask import Flask, request, jsonify
+import pandas as pd
+import numpy as np
+
+app = Flask(__name__)
+
+def load_growth_data():
+    """Load and prepare all growth standard datasets with proper type conversion"""
+    # Load height-for-age data
+    height_data = pd.read_excel("dataset.xlsx", header=None, skiprows=3, nrows=61)
+    height_data.columns = ['AGE', 'BOYS_MEDIAN_HEIGHT', 'BOYS_SD_HEIGHT', 
+                         'GIRLS_MEDIAN_HEIGHT', 'GIRLS_SD_HEIGHT']
+    
+        
+    # Load weight-for-age data
+    weight_data = pd.read_excel("dataset.xlsx", header=None, skiprows=67, nrows=61)
+    weight_data.columns = ['AGE', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT',
+                        'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
+
+    # Load weight-for-height data
+    wfh_data = pd.read_excel("dataset.xlsx", skiprows=132, nrows=101)
+
+    # Split into gender-specific tables properly
+    # Columns: HEIGHT, GIRLS_MEDIAN, GIRLS_SD, BOYS_MEDIAN, BOYS_SD
+    wfh_girls = wfh_data.iloc[:, 0:3].copy()
+    wfh_girls.columns = ['HEIGHT', 'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
+
+    wfh_boys = wfh_data.iloc[:, [0, 3, 4]].copy()  
+    wfh_boys.columns = ['HEIGHT', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT']
+
+    
+    # Convert all numeric columns to float and handle missing values
+    for df in [height_data, weight_data, wfh_girls, wfh_boys]:
+        for col in df.columns[1:]:  # Skip the first column (AGE/HEIGHT)
+            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
+    
+    return {
+        'height': height_data,
+        'weight': weight_data,
+        'wfh_girls': wfh_girls,
+        'wfh_boys': wfh_boys
+    }
+
+growth_data = load_growth_data()
+
+REGION_RECOMMENDATIONS = {
+    "Central": {
+        "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
+        "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
+        "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
+    },
+    "Western": {
+        "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
+        "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
+        "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
+    },
+    "Eastern": {
+        "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
+        "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
+        "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
+    },
+    "Northern": {
+        "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
+        "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
+        "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
+    }
+}
+
+def safe_float_conversion(value):
+    """Safely convert value to float, return 0 if conversion fails"""
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return 0.0
+
+def calculate_z_score(value, median, sd):
+    """Safe Z-score calculation with type checking"""
+    try:
+        value = safe_float_conversion(value)
+        median = safe_float_conversion(median)
+        sd = safe_float_conversion(sd)
+        
+        if sd == 0:
+            return 0.0
+        return (value - median) / sd
+    except:
+        return 0.0
+
+def get_closest_height_data(height, gender):
+    """Find closest height with robust type handling"""
+    try:
+        data = growth_data['wfh_girls'] if gender == 'girl' else growth_data['wfh_boys']
+        height = safe_float_conversion(height)
+        
+        # Convert HEIGHT column to float and drop NA
+        heights = pd.to_numeric(data['HEIGHT'], errors='coerce')
+        valid_heights = heights.dropna()
+        
+        if valid_heights.empty:
+            raise ValueError("No valid height data available")
+            
+        closest_idx = (valid_heights - height).abs().idxmin()
+        return data.loc[closest_idx]
+    except Exception as e:
+        raise ValueError(f"Error finding closest height: {str(e)}")
+
+def classify_growth(z_score, thresholds, labels):
+    """Classify growth status based on Z-score thresholds"""
+    for i, threshold in enumerate(thresholds):
+        if z_score < threshold:
+            return labels[i]
+    return labels[-1]
+
+@app.route('/get_nutrition_recommendations', methods=['POST'])
+def get_nutrition_recommendations():
+    try:
+        input_data = request.get_json()
+        required_fields = ['age', 'gender', 'height', 'weight', 'location']
+        
+        if not all(field in input_data for field in required_fields):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        # Convert and validate input values
+        try:
+            age = int(input_data['age'])
+            height = safe_float_conversion(input_data['height'])
+            weight = safe_float_conversion(input_data['weight'])
+            gender = input_data['gender'].lower()
+            location = input_data['location']
+        except:
+            return jsonify({"error": "Invalid input values"}), 400
+
+        if age < 1 or age > 60:
+            return jsonify({"error": "Age must be between 1-60 months"}), 400
+        if height <= 0 or weight <= 0:
+            return jsonify({"error": "Height and weight must be positive"}), 400
+        if gender not in ['boy', 'girl']:
+            return jsonify({"error": "Gender must be 'boy' or 'girl'"}), 400
+        if location not in REGION_RECOMMENDATIONS:
+            return jsonify({"error": "Invalid location specified"}), 400
+
+        # Calculate Z-scores with error handling
+        try:
+            # Height-for-age
+            hfa_row = growth_data['height'][growth_data['height']['AGE'] == age]
+            if hfa_row.empty:
+                return jsonify({"error": f"No height data for age {age} months"}), 404
+                
+            height_z = round(calculate_z_score(
+                height,
+                hfa_row[f"{gender.upper()}S_MEDIAN_HEIGHT"].values[0],
+                hfa_row[f"{gender.upper()}S_SD_HEIGHT"].values[0]
+            ), 2)
+
+            # Weight-for-age
+            wfa_row = growth_data['weight'][growth_data['weight']['AGE'] == age]
+            if wfa_row.empty:
+                return jsonify({"error": f"No weight data for age {age} months"}), 404
+                
+            weight_z = round(calculate_z_score(
+                weight,
+                wfa_row[f"{gender.upper()}S_MEDIAN_WEIGHT"].values[0],
+                wfa_row[f"{gender.upper()}S_SD_WEIGHT"].values[0]
+            ), 2)
+
+            # Weight-for-height
+            wfh_row = get_closest_height_data(height, gender)
+            wfh_z = round(calculate_z_score(
+                weight,
+                wfh_row[f"{gender.upper()}S_MEDIAN_WEIGHT"],
+                wfh_row[f"{gender.upper()}S_SD_WEIGHT"]
+            ), 2)
+
+        except Exception as e:
+            return jsonify({"error": f"Calculation error: {str(e)}"}), 500
+
+        # Classify results
+        height_status = classify_growth(
+            height_z,
+            [-3, -2, 2],
+            ["Severely Stunted", "Moderately Stunted", "Normal Height", "Above Average"]
+        )
+        
+        weight_status = classify_growth(
+            weight_z,
+            [-3, -2, 1],
+            ["Severely Underweight", "Moderately Underweight", "Normal Weight", "Overweight"]
+        )
+        
+        wasting_status = classify_growth(
+            wfh_z,
+            [-3, -2],
+            ["Severe Wasting", "Moderate Wasting", "Normal"]
+        )
+
+        # Prepare response with consistent field names
+        response = {
+            "Height": {
+                "Z-score": height_z,
+                "Status": height_status,
+                "Recommendation": (
+                    REGION_RECOMMENDATIONS[location]["Stunting"] 
+                    if height_z < -2 
+                    else "Normal height for age"
+                )
+            },
+            "Weight-for-Age": {
+                "Z-score": weight_z,
+                "Status": weight_status,
+                "Recommendation": (
+                    REGION_RECOMMENDATIONS[location]["Underweight"]
+                    if weight_z < -2
+                    else "Normal weight for age"
+                )
+            },
+            "Weight-for-Height": {
+                "Z-score": wfh_z,
+                "Status": wasting_status,
+                "Recommendation": (
+                    REGION_RECOMMENDATIONS[location]["Wasting"]
+                    if wfh_z < -2
+                    else "Normal weight for height"
+                )
+            },
+            "Region": location
+        }
+
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+# from flask import Flask, request, jsonify
+# import pandas as pd
+# import numpy as np
+
+
+# app = Flask(__name__)
+
+# # ====================== DATA LOADING ======================
+# def load_growth_data():
+#     """Load and prepare all growth standard datasets"""
+#     # Load height-for-age data (rows 3-63)
+#     height_data = pd.read_excel("dataset.xlsx", header=None, skiprows=3, nrows=61)
+#     height_data.columns = ['AGE', 'BOYS_MEDIAN_HEIGHT', 'BOYS_SD_HEIGHT', 
+#                          'GIRLS_MEDIAN_HEIGHT', 'GIRLS_SD_HEIGHT']
+
+#     # Load weight-for-age data (rows 67-127)
+#     weight_data = pd.read_excel("dataset.xlsx", header=None, skiprows=67, nrows=61)
+#     weight_data.columns = ['AGE', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT',
+#                          'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
+
+#     # Load weight-for-height data (rows 131-231)
+#     wfh_data = pd.read_excel("dataset.xlsx", header=None, skiprows=132, nrows=101)
+    
+#     # Split into gender-specific tables
+#     wfh_girls = wfh_data.iloc[:, :3].copy()
+#     wfh_girls.columns = ['HEIGHT', 'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
+    
+#     wfh_boys = wfh_data.iloc[:, 2:].copy()
+#     wfh_boys.columns = ['HEIGHT', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT']
+    
+#     # Clean data
+#     for df in [height_data, weight_data, wfh_girls, wfh_boys]:
+#         df.replace([np.inf, -np.inf], np.nan, inplace=True)
+#         df.fillna(0, inplace=True)
+         
+#     return {
+#         'height': height_data,
+#         'weight': weight_data,
+#         'wfh_girls': wfh_girls,
+#         'wfh_boys': wfh_boys
+#     }
+
+# # Load data at startup
+# growth_data = load_growth_data()
+
+# # ====================== REGION RECOMMENDATIONS ======================
+# REGION_RECOMMENDATIONS = {
+#     "Central": {
+#         "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
+#         "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
+#         "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
+#     },
+#     "Western": {
+#         "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
+#         "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
+#         "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
+#     },
+#     "Eastern": {
+#         "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
+#         "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
+#         "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
+#     },
+#     "Northern": {
+#         "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
+#         "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
+#         "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
+#     }
+# }
+
+# # ====================== CORE FUNCTIONS ======================
+# def calculate_z_score(value, median, sd):
+#     """Calculate Z-score for growth indicators"""
+#     if sd == 0:
+#         return 0  # Prevent division by zero
+#     return (value - median) / sd
+
+# def get_closest_height_data(height, gender):
+#     """Find closest height in weight-for-height table"""
+#     data = growth_data['wfh_girls'] if gender == 'girl' else growth_data['wfh_boys']
+#     closest_idx = (data['HEIGHT'] - height).abs().idxmin()
+#     return data.loc[closest_idx]
+
+# def classify_growth(z_score, thresholds, labels):
+#     """Classify growth status based on Z-score thresholds"""
+#     for i, threshold in enumerate(thresholds):
+#         if z_score < threshold:
+#             return labels[i]
+#     return labels[-1]
+
+# # ====================== API ENDPOINT ======================
+# @app.route('/get_nutrition_recommendations', methods=['POST'])
+# def get_nutrition_recommendations():
+#     try:
+#         # Validate and parse input
+#         input_data = request.get_json()
+#         required_fields = ['age', 'gender', 'height', 'weight', 'location']
+        
+#         if not all(field in input_data for field in required_fields):
+#             return jsonify({"error": "Missing required fields"}), 400
+
+#         # Convert input values to proper numeric types
+#         try:
+#             age = int(input_data['age'])
+#             height = float(input_data['height'])
+#             weight = float(input_data['weight'])
+#         except ValueError:
+#             return jsonify({"error": "Invalid numeric values provided"}), 400
+            
+#         gender = input_data['gender'].lower()
+#         location = input_data['location']
+
+#                # Calculate all Z-scores
+#         try:
+#             # Height-for-age
+#             hfa_row = growth_data['height'][growth_data['height']['AGE'] == age]
+#             if hfa_row.empty:
+#                 return jsonify({"error": f"No height data for age {age} months"}), 404
+                
+#             median_height = float(hfa_row[f"{gender.upper()}S_MEDIAN_HEIGHT"].values[0])
+#             sd_height = float(hfa_row[f"{gender.upper()}S_SD_HEIGHT"].values[0])
+#             height_z = round(calculate_z_score(height, median_height, sd_height), 2)
+
+#             # Weight-for-age
+#             wfa_row = growth_data['weight'][growth_data['weight']['AGE'] == age]
+#             if wfa_row.empty:
+#                 return jsonify({"error": f"No weight data for age {age} months"}), 404
+                
+#             median_weight = float(wfa_row[f"{gender.upper()}S_MEDIAN_WEIGHT"].values[0])
+#             sd_weight = float(wfa_row[f"{gender.upper()}S_SD_WEIGHT"].values[0])
+#             weight_z = round(calculate_z_score(weight, median_weight, sd_weight), 2)
+
+#             # Weight-for-height (wasting)
+#             wfh_row = get_closest_height_data(height, gender)
+#             median_wfh = float(wfh_row[f"{gender.upper()}S_MEDIAN_WEIGHT"])
+#             sd_wfh = float(wfh_row[f"{gender.upper()}S_SD_WEIGHT"])
+#             wfh_z = round(calculate_z_score(weight, median_wfh, sd_wfh), 2)
+
+#         except Exception as e:
+#             return jsonify({"error": f"Data calculation error: {str(e)}"}), 500
+#         # Classify results
+#         height_status = classify_growth(
+#             height_z,
+#             [-3, -2, 2],
+#             ["Severely Stunted", "Moderately Stunted", "Normal Height", "Above Average"]
+#         )
+        
+#         weight_status = classify_growth(
+#             weight_z,
+#             [-3, -2, 1],
+#             ["Severely Underweight", "Moderately Underweight", "Normal Weight", "Overweight"]
+#         )
+        
+#         wasting_status = classify_growth(
+#             wfh_z,
+#             [-3, -2],
+#             ["Severe Wasting", "Moderate Wasting", "Normal"]
+#         )
+
+#         # Get recommendations
+#         recommendations = {
+#             "Height": {
+#                 "Z-score": height_z,
+#                 "Status": height_status,
+#                 "Recommendation": (
+#                     REGION_RECOMMENDATIONS[location]["Stunting"] 
+#                     if height_z < -2 
+#                     else "Maintain a balanced diet with a variety of nutrients."
+#                 )
+#             },
+#             "Weight-for-Age": {
+#                 "Z-score": weight_z,
+#                 "Status": weight_status,
+#                 "Recommendation": (
+#                     REGION_RECOMMENDATIONS[location]["Underweight"]
+#                     if weight_z < -2
+#                     else "Maintain a healthy diet and lifestyle."
+#                 )
+#             },
+#             "Weight-for-Height": {
+#                 "Z-score": wfh_z,
+#                 "Status": wasting_status,
+#                 "Recommendation": (
+#                     REGION_RECOMMENDATIONS[location]["Wasting"]
+#                     if wfh_z < -2
+#                     else "Maintain a good balance of protein, carbohydrates, and fats."
+#                 )
+#             },
+#             "Region": location
+#         }
+
+#         return jsonify(recommendations)
+
+#     except Exception as e:
+#         return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# # ====================== MAIN ======================
+
+# if __name__ == '__main__':
+#     app.run(debug=True)
+
+
+
 # from flask import Flask, request, jsonify
 # import pandas as pd
 # import os
@@ -454,443 +989,3 @@
 
 
 
-
-
-
-
-
-# from flask import Flask, request, jsonify
-# import pandas as pd
-# import numpy as np
-
-
-# app = Flask(__name__)
-
-# # ====================== DATA LOADING ======================
-# def load_growth_data():
-#     """Load and prepare all growth standard datasets"""
-#     # Load height-for-age data (rows 3-63)
-#     height_data = pd.read_excel("dataset.xlsx", header=None, skiprows=3, nrows=61)
-#     height_data.columns = ['AGE', 'BOYS_MEDIAN_HEIGHT', 'BOYS_SD_HEIGHT', 
-#                          'GIRLS_MEDIAN_HEIGHT', 'GIRLS_SD_HEIGHT']
-
-#     # Load weight-for-age data (rows 67-127)
-#     weight_data = pd.read_excel("dataset.xlsx", header=None, skiprows=67, nrows=61)
-#     weight_data.columns = ['AGE', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT',
-#                          'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
-
-#     # Load weight-for-height data (rows 131-231)
-#     wfh_data = pd.read_excel("dataset.xlsx", header=None, skiprows=132, nrows=101)
-    
-#     # Split into gender-specific tables
-#     wfh_girls = wfh_data.iloc[:, :3].copy()
-#     wfh_girls.columns = ['HEIGHT', 'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
-    
-#     wfh_boys = wfh_data.iloc[:, 2:].copy()
-#     wfh_boys.columns = ['HEIGHT', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT']
-    
-#     # Clean data
-#     for df in [height_data, weight_data, wfh_girls, wfh_boys]:
-#         df.replace([np.inf, -np.inf], np.nan, inplace=True)
-#         df.fillna(0, inplace=True)
-         
-#     return {
-#         'height': height_data,
-#         'weight': weight_data,
-#         'wfh_girls': wfh_girls,
-#         'wfh_boys': wfh_boys
-#     }
-
-# # Load data at startup
-# growth_data = load_growth_data()
-
-# # ====================== REGION RECOMMENDATIONS ======================
-# REGION_RECOMMENDATIONS = {
-#     "Central": {
-#         "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
-#         "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
-#         "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
-#     },
-#     "Western": {
-#         "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
-#         "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
-#         "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
-#     },
-#     "Eastern": {
-#         "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
-#         "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
-#         "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
-#     },
-#     "Northern": {
-#         "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
-#         "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
-#         "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
-#     }
-# }
-
-# # ====================== CORE FUNCTIONS ======================
-# def calculate_z_score(value, median, sd):
-#     """Calculate Z-score for growth indicators"""
-#     if sd == 0:
-#         return 0  # Prevent division by zero
-#     return (value - median) / sd
-
-# def get_closest_height_data(height, gender):
-#     """Find closest height in weight-for-height table"""
-#     data = growth_data['wfh_girls'] if gender == 'girl' else growth_data['wfh_boys']
-#     closest_idx = (data['HEIGHT'] - height).abs().idxmin()
-#     return data.loc[closest_idx]
-
-# def classify_growth(z_score, thresholds, labels):
-#     """Classify growth status based on Z-score thresholds"""
-#     for i, threshold in enumerate(thresholds):
-#         if z_score < threshold:
-#             return labels[i]
-#     return labels[-1]
-
-# # ====================== API ENDPOINT ======================
-# @app.route('/get_nutrition_recommendations', methods=['POST'])
-# def get_nutrition_recommendations():
-#     try:
-#         # Validate and parse input
-#         input_data = request.get_json()
-#         required_fields = ['age', 'gender', 'height', 'weight', 'location']
-        
-#         if not all(field in input_data for field in required_fields):
-#             return jsonify({"error": "Missing required fields"}), 400
-
-#         # Convert input values to proper numeric types
-#         try:
-#             age = int(input_data['age'])
-#             height = float(input_data['height'])
-#             weight = float(input_data['weight'])
-#         except ValueError:
-#             return jsonify({"error": "Invalid numeric values provided"}), 400
-            
-#         gender = input_data['gender'].lower()
-#         location = input_data['location']
-
-#                # Calculate all Z-scores
-#         try:
-#             # Height-for-age
-#             hfa_row = growth_data['height'][growth_data['height']['AGE'] == age]
-#             if hfa_row.empty:
-#                 return jsonify({"error": f"No height data for age {age} months"}), 404
-                
-#             median_height = float(hfa_row[f"{gender.upper()}S_MEDIAN_HEIGHT"].values[0])
-#             sd_height = float(hfa_row[f"{gender.upper()}S_SD_HEIGHT"].values[0])
-#             height_z = round(calculate_z_score(height, median_height, sd_height), 2)
-
-#             # Weight-for-age
-#             wfa_row = growth_data['weight'][growth_data['weight']['AGE'] == age]
-#             if wfa_row.empty:
-#                 return jsonify({"error": f"No weight data for age {age} months"}), 404
-                
-#             median_weight = float(wfa_row[f"{gender.upper()}S_MEDIAN_WEIGHT"].values[0])
-#             sd_weight = float(wfa_row[f"{gender.upper()}S_SD_WEIGHT"].values[0])
-#             weight_z = round(calculate_z_score(weight, median_weight, sd_weight), 2)
-
-#             # Weight-for-height (wasting)
-#             wfh_row = get_closest_height_data(height, gender)
-#             median_wfh = float(wfh_row[f"{gender.upper()}S_MEDIAN_WEIGHT"])
-#             sd_wfh = float(wfh_row[f"{gender.upper()}S_SD_WEIGHT"])
-#             wfh_z = round(calculate_z_score(weight, median_wfh, sd_wfh), 2)
-
-#         except Exception as e:
-#             return jsonify({"error": f"Data calculation error: {str(e)}"}), 500
-#         # Classify results
-#         height_status = classify_growth(
-#             height_z,
-#             [-3, -2, 2],
-#             ["Severely Stunted", "Moderately Stunted", "Normal Height", "Above Average"]
-#         )
-        
-#         weight_status = classify_growth(
-#             weight_z,
-#             [-3, -2, 1],
-#             ["Severely Underweight", "Moderately Underweight", "Normal Weight", "Overweight"]
-#         )
-        
-#         wasting_status = classify_growth(
-#             wfh_z,
-#             [-3, -2],
-#             ["Severe Wasting", "Moderate Wasting", "Normal"]
-#         )
-
-#         # Get recommendations
-#         recommendations = {
-#             "Height": {
-#                 "Z-score": height_z,
-#                 "Status": height_status,
-#                 "Recommendation": (
-#                     REGION_RECOMMENDATIONS[location]["Stunting"] 
-#                     if height_z < -2 
-#                     else "Maintain a balanced diet with a variety of nutrients."
-#                 )
-#             },
-#             "Weight-for-Age": {
-#                 "Z-score": weight_z,
-#                 "Status": weight_status,
-#                 "Recommendation": (
-#                     REGION_RECOMMENDATIONS[location]["Underweight"]
-#                     if weight_z < -2
-#                     else "Maintain a healthy diet and lifestyle."
-#                 )
-#             },
-#             "Weight-for-Height": {
-#                 "Z-score": wfh_z,
-#                 "Status": wasting_status,
-#                 "Recommendation": (
-#                     REGION_RECOMMENDATIONS[location]["Wasting"]
-#                     if wfh_z < -2
-#                     else "Maintain a good balance of protein, carbohydrates, and fats."
-#                 )
-#             },
-#             "Region": location
-#         }
-
-#         return jsonify(recommendations)
-
-#     except Exception as e:
-#         return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-# # ====================== MAIN ======================
-
-# if __name__ == '__main__':
-#     app.run(debug=True)
-
-
-from flask import Flask, request, jsonify
-import pandas as pd
-import numpy as np
-
-app = Flask(__name__)
-
-def load_growth_data():
-    """Load and prepare all growth standard datasets with proper type conversion"""
-    # Load height-for-age data
-    height_data = pd.read_excel("dataset.xlsx", header=None, skiprows=3, nrows=61)
-    height_data.columns = ['AGE', 'BOYS_MEDIAN_HEIGHT', 'BOYS_SD_HEIGHT', 
-                         'GIRLS_MEDIAN_HEIGHT', 'GIRLS_SD_HEIGHT']
-    
-        
-    # Load weight-for-age data
-    weight_data = pd.read_excel("dataset.xlsx", header=None, skiprows=67, nrows=61)
-    weight_data.columns = ['AGE', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT',
-                        'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
-
-    # Load weight-for-height data
-    wfh_data = pd.read_excel("dataset.xlsx", skiprows=132, nrows=101)
-
-    # Split into gender-specific tables properly
-    # Columns: HEIGHT, GIRLS_MEDIAN, GIRLS_SD, BOYS_MEDIAN, BOYS_SD
-    wfh_girls = wfh_data.iloc[:, 0:3].copy()
-    wfh_girls.columns = ['HEIGHT', 'GIRLS_MEDIAN_WEIGHT', 'GIRLS_SD_WEIGHT']
-
-    wfh_boys = wfh_data.iloc[:, [0, 3, 4]].copy()  
-    wfh_boys.columns = ['HEIGHT', 'BOYS_MEDIAN_WEIGHT', 'BOYS_SD_WEIGHT']
-
-    
-    # Convert all numeric columns to float and handle missing values
-    for df in [height_data, weight_data, wfh_girls, wfh_boys]:
-        for col in df.columns[1:]:  # Skip the first column (AGE/HEIGHT)
-            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-    
-    return {
-        'height': height_data,
-        'weight': weight_data,
-        'wfh_girls': wfh_girls,
-        'wfh_boys': wfh_boys
-    }
-
-growth_data = load_growth_data()
-
-REGION_RECOMMENDATIONS = {
-    "Central": {
-        "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
-        "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
-        "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
-    },
-    "Western": {
-        "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
-        "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
-        "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
-    },
-    "Eastern": {
-        "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
-        "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
-        "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
-    },
-    "Northern": {
-        "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
-        "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
-        "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
-    }
-}
-
-def safe_float_conversion(value):
-    """Safely convert value to float, return 0 if conversion fails"""
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return 0.0
-
-def calculate_z_score(value, median, sd):
-    """Safe Z-score calculation with type checking"""
-    try:
-        value = safe_float_conversion(value)
-        median = safe_float_conversion(median)
-        sd = safe_float_conversion(sd)
-        
-        if sd == 0:
-            return 0.0
-        return (value - median) / sd
-    except:
-        return 0.0
-
-def get_closest_height_data(height, gender):
-    """Find closest height with robust type handling"""
-    try:
-        data = growth_data['wfh_girls'] if gender == 'girl' else growth_data['wfh_boys']
-        height = safe_float_conversion(height)
-        
-        # Convert HEIGHT column to float and drop NA
-        heights = pd.to_numeric(data['HEIGHT'], errors='coerce')
-        valid_heights = heights.dropna()
-        
-        if valid_heights.empty:
-            raise ValueError("No valid height data available")
-            
-        closest_idx = (valid_heights - height).abs().idxmin()
-        return data.loc[closest_idx]
-    except Exception as e:
-        raise ValueError(f"Error finding closest height: {str(e)}")
-
-def classify_growth(z_score, thresholds, labels):
-    """Classify growth status based on Z-score thresholds"""
-    for i, threshold in enumerate(thresholds):
-        if z_score < threshold:
-            return labels[i]
-    return labels[-1]
-
-@app.route('/get_nutrition_recommendations', methods=['POST'])
-def get_nutrition_recommendations():
-    try:
-        input_data = request.get_json()
-        required_fields = ['age', 'gender', 'height', 'weight', 'location']
-        
-        if not all(field in input_data for field in required_fields):
-            return jsonify({"error": "Missing required fields"}), 400
-
-        # Convert and validate input values
-        try:
-            age = int(input_data['age'])
-            height = safe_float_conversion(input_data['height'])
-            weight = safe_float_conversion(input_data['weight'])
-            gender = input_data['gender'].lower()
-            location = input_data['location']
-        except:
-            return jsonify({"error": "Invalid input values"}), 400
-
-        if age < 1 or age > 60:
-            return jsonify({"error": "Age must be between 1-60 months"}), 400
-        if height <= 0 or weight <= 0:
-            return jsonify({"error": "Height and weight must be positive"}), 400
-        if gender not in ['boy', 'girl']:
-            return jsonify({"error": "Gender must be 'boy' or 'girl'"}), 400
-        if location not in REGION_RECOMMENDATIONS:
-            return jsonify({"error": "Invalid location specified"}), 400
-
-        # Calculate Z-scores with error handling
-        try:
-            # Height-for-age
-            hfa_row = growth_data['height'][growth_data['height']['AGE'] == age]
-            if hfa_row.empty:
-                return jsonify({"error": f"No height data for age {age} months"}), 404
-                
-            height_z = round(calculate_z_score(
-                height,
-                hfa_row[f"{gender.upper()}S_MEDIAN_HEIGHT"].values[0],
-                hfa_row[f"{gender.upper()}S_SD_HEIGHT"].values[0]
-            ), 2)
-
-            # Weight-for-age
-            wfa_row = growth_data['weight'][growth_data['weight']['AGE'] == age]
-            if wfa_row.empty:
-                return jsonify({"error": f"No weight data for age {age} months"}), 404
-                
-            weight_z = round(calculate_z_score(
-                weight,
-                wfa_row[f"{gender.upper()}S_MEDIAN_WEIGHT"].values[0],
-                wfa_row[f"{gender.upper()}S_SD_WEIGHT"].values[0]
-            ), 2)
-
-            # Weight-for-height
-            wfh_row = get_closest_height_data(height, gender)
-            wfh_z = round(calculate_z_score(
-                weight,
-                wfh_row[f"{gender.upper()}S_MEDIAN_WEIGHT"],
-                wfh_row[f"{gender.upper()}S_SD_WEIGHT"]
-            ), 2)
-
-        except Exception as e:
-            return jsonify({"error": f"Calculation error: {str(e)}"}), 500
-
-        # Classify results
-        height_status = classify_growth(
-            height_z,
-            [-3, -2, 2],
-            ["Severely Stunted", "Moderately Stunted", "Normal Height", "Above Average"]
-        )
-        
-        weight_status = classify_growth(
-            weight_z,
-            [-3, -2, 1],
-            ["Severely Underweight", "Moderately Underweight", "Normal Weight", "Overweight"]
-        )
-        
-        wasting_status = classify_growth(
-            wfh_z,
-            [-3, -2],
-            ["Severe Wasting", "Moderate Wasting", "Normal"]
-        )
-
-        # Prepare response with consistent field names
-        response = {
-            "Height": {
-                "Z-score": height_z,
-                "Status": height_status,
-                "Recommendation": (
-                    REGION_RECOMMENDATIONS[location]["Stunting"] 
-                    if height_z < -2 
-                    else "Normal height for age"
-                )
-            },
-            "Weight-for-Age": {
-                "Z-score": weight_z,
-                "Status": weight_status,
-                "Recommendation": (
-                    REGION_RECOMMENDATIONS[location]["Underweight"]
-                    if weight_z < -2
-                    else "Normal weight for age"
-                )
-            },
-            "Weight-for-Height": {
-                "Z-score": wfh_z,
-                "Status": wasting_status,
-                "Recommendation": (
-                    REGION_RECOMMENDATIONS[location]["Wasting"]
-                    if wfh_z < -2
-                    else "Normal weight for height"
-                )
-            },
-            "Region": location
-        }
-
-        return jsonify(response)
-
-    except Exception as e:
-        return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
