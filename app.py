@@ -45,125 +45,125 @@ def load_growth_data():
 
 growth_data = load_growth_data()
 
-# REGION_RECOMMENDATIONS = {
-#     "Central": {
-#         "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
-#         "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
-#         "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
-#     },
-#     "Western": {
-#         "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
-#         "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
-#         "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
-#     },
-#     "Eastern": {
-#         "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
-#         "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
-#         "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
-#     },
-#     "Northern": {
-#         "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
-#         "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
-#         "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
-#     }
-# }
-
-
 REGION_RECOMMENDATIONS = {
     "Central": {
-        "Stunting": " "Monday": "Millet porridge with milk + mashed avocado",
-                "Tuesday": "Sweet potato mash with groundnut sauce + boiled egg",
-                "Wednesday": "Matooke (steamed bananas) with beans + orange slices",
-                "Thursday": "Rice with small fish  + leafy greens",
-                "Friday": "Posho (maize flour) with peanut sauce + diced pawpaw",
-                "Saturday": "Mashed potatoes with liver stew + mango pieces",
-                "Sunday": "Cassava with silver fish  + sautéed greens"",
-                
-        "Wasting": " "Monday": "High-energy milk porridge with added sugar + banana",
-                "Tuesday": "Millet porridge with ghee + roasted groundnuts",
-                "Wednesday": "Sweet potato with butter + full-fat yogurt",
-                "Thursday": "Avocado mashed with honey + milk",
-                "Friday": "Groundnut paste with bread + mango slices",
-                "Saturday": "Rice cooked with milk + mashed beans",
-                "Sunday": "Porridge with simsim paste + boiled egg"",
-        "Underweight": " "Monday": "Porridge with milk + banana (3 meals)",
-                "Tuesday": "Rice with groundnut sauce + avocado (3 meals)",
-                "Wednesday": "Sweet potatoes with beans + orange (3 meals)",
-                "Thursday": "Matooke with small fish + greens (3 meals)",
-                "Friday": "Posho with liver + mango (3 meals)",
-                "Saturday": "Cassava with peanut butter + milk (3 meals)",
-                "Sunday": "Millet bread with eggs + fruit (3 meals)""
+        "Stunting": "Provide a balanced diet rich in proteins (eggs, fish, beans), energy-giving foods (sweet potatoes, matoke), and vegetables for vitamins.",
+        "Wasting": "Ensure high-energy foods like full-fat milk, millet porridge, and groundnut paste. Seek medical help for severe cases.",
+        "Underweight": "Increase meal frequency and include foods like avocado, peanut sauce, and fresh fruits. If no improvement, consult a nutritionist."
     },
     "Western": {
-        "Stunting": " "Monday": "Millet bread with milk + banana",
-                "Tuesday": "Sweet potatoes with beef stew + greens",
-                "Wednesday": "Cassava with groundnut sauce + mango",
-                "Thursday": "Rice with beans + avocado",
-                "Friday": "Irish potatoes with fish + orange",
-                "Saturday": "Millet porridge with milk + pawpaw",
-                "Sunday": "Posho with chicken liver + vegetables"",
-        "Wasting": " "Monday": "Millet porridge with ghee + honey",
-                "Tuesday": "Sweet potato with butter + milk",
-                "Wednesday": "Avocado with sugar + roasted groundnuts",
-                "Thursday": "Rice cooked in milk + mashed beans",
-                "Friday": "Porridge with simsim paste + banana",
-                "Saturday": "Cassava with groundnut paste + milk",
-                "Sunday": "Millet bread with ghee + mango"",
-        "Underweight": " "Monday": "Millet porridge + milk + banana (3 meals)",
-                "Tuesday": "Beans with rice + avocado (3 meals)",
-                "Wednesday": "Sweet potato with beef + greens (3 meals)",
-                "Thursday": "Cassava with groundnuts + milk (3 meals)",
-                "Friday": "Irish potatoes with fish + orange (3 meals)",
-                "Saturday": "Posho with chicken + vegetables (3 meals)",
-                "Sunday": "Millet bread with eggs + fruit (3 meals)""
+        "Stunting": "Include milk, millet bread, beef, and leafy greens. Regular checkups are recommended to monitor growth.",
+        "Wasting": "Give high-energy foods such as millet porridge, ghee, roasted groundnuts, and milk. Seek medical care for severe cases.",
+        "Underweight": "Increase portions of protein-rich foods (beans, chicken) and serve meals with avocado. Encourage fresh milk consumption."
     },
     "Eastern": {
-        "Stunting": ""Monday": "Millet porridge with groundnuts + milk",
-                "Tuesday": "Rice with mukene fish + greens",
-                "Wednesday": "Sweet potatoes with beans + orange",
-                "Thursday": "Cassava with groundnut sauce + mango",
-                "Friday": "Posho with silver fish + vegetables",
-                "Saturday": "Matooke with peanut sauce + pawpaw",
-                "Sunday": "Rice with chicken + avocado"",
-        "Wasting": " "Monday": "High-energy porridge with milk + honey",
-                "Tuesday": "Rice cooked with milk + mashed beans",
-                "Wednesday": "Sweet potato with butter + groundnuts",
-                "Thursday": "Avocado with sugar + milk",
-                "Friday": "Porridge with simsim + banana",
-                "Saturday": "Cassava with ghee + mango",
-                "Sunday": "Millet bread with peanut butter + milk"",
-        "Underweight": "nday": "Millet porridge + milk + banana (3 meals)",
-                "Tuesday": "Rice with beans + avocado (3 meals)",
-                "Wednesday": "Sweet potato with fish + greens (3 meals)",
-                "Thursday": "Cassava with groundnuts + milk (3 meals)",
-                "Friday": "Posho with silver fish + orange (3 meals)",
-                "Saturday": "Matooke with peanut sauce + mango (3 meals)",
-                "Sunday": "Rice with chicken + vegetables (3 meals)""
+        "Stunting": "Encourage millet porridge with groundnut paste, rice with fish, and leafy greens. Seek medical assessment if stunting persists.",
+        "Wasting": "Provide fish, energy-rich porridge with milk, and fresh fruit. Severe cases require immediate medical attention.",
+        "Underweight": "Increase portions of rice, beans, and cassava, and add roasted groundnuts. Fresh fruits and vegetables improve overall health."
     },
     "Northern": {
-        "Stunting": "  "Monday": "Sorghum porridge with milk + mango",
-                "Tuesday": "Cassava with goat meat stew + greens",
-                "Wednesday": "Sweet potatoes with simsim paste + orange",
-                "Thursday": "Millet bread with groundnuts + milk",
-                "Friday": "Rice with beans + avocado",
-                "Saturday": "Posho with fish + vegetables",
-                "Sunday": "Sorghum bread with liver + pawpaw"",
-        "Wasting": " "Monday": "Sorghum porridge with ghee + honey",
-                "Tuesday": "Cassava with simsim paste + milk",
-                "Wednesday": "Sweet potato with butter + groundnuts",
-                "Thursday": "Porridge with milk + sugar",
-                "Friday": "Rice cooked with oil + mashed beans",
-                "Saturday": "Millet bread with peanut butter + banana",
-                "Sunday": "Sorghum porridge with simsim + milk"",
-        "Underweight": "  "Monday": "Sorghum porridge + milk + mango (3 meals)",
-                "Tuesday": "Cassava with goat meat + greens (3 meals)",
-                "Wednesday": "Sweet potatoes with simsim + orange (3 meals)",
-                "Thursday": "Millet bread with groundnuts + milk (3 meals)",
-                "Friday": "Rice with beans + avocado (3 meals)",
-                "Saturday": "Posho with fish + vegetables (3 meals)",
-                "Sunday": "Sorghum bread with liver + pawpaw (3 meals)""
+        "Stunting": "Give nutrient-rich foods like sorghum bread, goat meat, and leafy greens. Periodic health checkups are essential.",
+        "Wasting": "Include sorghum porridge with groundnut paste, dry fish, and sim-sim. Seek urgent medical attention for severe malnutrition.",
+        "Underweight": "Increase meals with protein (goat meat, beans) and energy foods (cassava, avocado). If weight gain is slow, seek medical advice."
     }
 }
+
+
+# REGION_RECOMMENDATIONS = {
+#     "Central": {
+        # "Stunting": " Monday: Millet porridge with milk + mashed avocado.
+        #         Tuesday: Sweet potato mash  groundnut sauce + boiled egg.
+        #         Wednesday: Matooke (steamed bananas) beans + orange slices.
+        #         Thursday: Rice with small fish  + leafy greens.
+        #         Friday: Posho (maize flour) with peanut sauce + diced pawpaw
+        #         Saturday: Mashed potatoes with liver stew + mango pieces
+        #         Sunday: Cassava with silver fish  + sautéed greens",
+                
+#         "Wasting": " "Monday": "High-energy milk porridge with added sugar + banana",
+#                 "Tuesday": "Millet porridge with ghee + roasted groundnuts",
+#                 "Wednesday": "Sweet potato with butter + full-fat yogurt",
+#                 "Thursday": "Avocado mashed with honey + milk",
+#                 "Friday": "Groundnut paste with bread + mango slices",
+#                 "Saturday": "Rice cooked with milk + mashed beans",
+#                 "Sunday": "Porridge with simsim paste + boiled egg"",
+#         "Underweight": " "Monday": "Porridge with milk + banana (3 meals)",
+#                 "Tuesday": "Rice with groundnut sauce + avocado (3 meals)",
+#                 "Wednesday": "Sweet potatoes with beans + orange (3 meals)",
+#                 "Thursday": "Matooke with small fish + greens (3 meals)",
+#                 "Friday": "Posho with liver + mango (3 meals)",
+#                 "Saturday": "Cassava with peanut butter + milk (3 meals)",
+#                 "Sunday": "Millet bread with eggs + fruit (3 meals)""
+#     },
+#     "Western": {
+#         "Stunting": " "Monday": "Millet bread with milk + banana",
+#                 "Tuesday": "Sweet potatoes with beef stew + greens",
+#                 "Wednesday": "Cassava with groundnut sauce + mango",
+#                 "Thursday": "Rice with beans + avocado",
+#                 "Friday": "Irish potatoes with fish + orange",
+#                 "Saturday": "Millet porridge with milk + pawpaw",
+#                 "Sunday": "Posho with chicken liver + vegetables"",
+#         "Wasting": " "Monday": "Millet porridge with ghee + honey",
+#                 "Tuesday": "Sweet potato with butter + milk",
+#                 "Wednesday": "Avocado with sugar + roasted groundnuts",
+#                 "Thursday": "Rice cooked in milk + mashed beans",
+#                 "Friday": "Porridge with simsim paste + banana",
+#                 "Saturday": "Cassava with groundnut paste + milk",
+#                 "Sunday": "Millet bread with ghee + mango"",
+#         "Underweight": " "Monday": "Millet porridge + milk + banana (3 meals)",
+#                 "Tuesday": "Beans with rice + avocado (3 meals)",
+#                 "Wednesday": "Sweet potato with beef + greens (3 meals)",
+#                 "Thursday": "Cassava with groundnuts + milk (3 meals)",
+#                 "Friday": "Irish potatoes with fish + orange (3 meals)",
+#                 "Saturday": "Posho with chicken + vegetables (3 meals)",
+#                 "Sunday": "Millet bread with eggs + fruit (3 meals)""
+#     },
+#     "Eastern": {
+#         "Stunting": ""Monday": "Millet porridge with groundnuts + milk",
+#                 "Tuesday": "Rice with mukene fish + greens",
+#                 "Wednesday": "Sweet potatoes with beans + orange",
+#                 "Thursday": "Cassava with groundnut sauce + mango",
+#                 "Friday": "Posho with silver fish + vegetables",
+#                 "Saturday": "Matooke with peanut sauce + pawpaw",
+#                 "Sunday": "Rice with chicken + avocado"",
+#         "Wasting": " "Monday": "High-energy porridge with milk + honey",
+#                 "Tuesday": "Rice cooked with milk + mashed beans",
+#                 "Wednesday": "Sweet potato with butter + groundnuts",
+#                 "Thursday": "Avocado with sugar + milk",
+#                 "Friday": "Porridge with simsim + banana",
+#                 "Saturday": "Cassava with ghee + mango",
+#                 "Sunday": "Millet bread with peanut butter + milk"",
+#         "Underweight": "nday": "Millet porridge + milk + banana (3 meals)",
+#                 "Tuesday": "Rice with beans + avocado (3 meals)",
+#                 "Wednesday": "Sweet potato with fish + greens (3 meals)",
+#                 "Thursday": "Cassava with groundnuts + milk (3 meals)",
+#                 "Friday": "Posho with silver fish + orange (3 meals)",
+#                 "Saturday": "Matooke with peanut sauce + mango (3 meals)",
+#                 "Sunday": "Rice with chicken + vegetables (3 meals)""
+#     },
+#     "Northern": {
+#         "Stunting": "  "Monday": "Sorghum porridge with milk + mango",
+#                 "Tuesday": "Cassava with goat meat stew + greens",
+#                 "Wednesday": "Sweet potatoes with simsim paste + orange",
+#                 "Thursday": "Millet bread with groundnuts + milk",
+#                 "Friday": "Rice with beans + avocado",
+#                 "Saturday": "Posho with fish + vegetables",
+#                 "Sunday": "Sorghum bread with liver + pawpaw"",
+#         "Wasting": " "Monday": "Sorghum porridge with ghee + honey",
+#                 "Tuesday": "Cassava with simsim paste + milk",
+#                 "Wednesday": "Sweet potato with butter + groundnuts",
+#                 "Thursday": "Porridge with milk + sugar",
+#                 "Friday": "Rice cooked with oil + mashed beans",
+#                 "Saturday": "Millet bread with peanut butter + banana",
+#                 "Sunday": "Sorghum porridge with simsim + milk"",
+#         "Underweight": "  "Monday": "Sorghum porridge + milk + mango (3 meals)",
+#                 "Tuesday": "Cassava with goat meat + greens (3 meals)",
+#                 "Wednesday": "Sweet potatoes with simsim + orange (3 meals)",
+#                 "Thursday": "Millet bread with groundnuts + milk (3 meals)",
+#                 "Friday": "Rice with beans + avocado (3 meals)",
+#                 "Saturday": "Posho with fish + vegetables (3 meals)",
+#                 "Sunday": "Sorghum bread with liver + pawpaw (3 meals)""
+#     }
+# }
 
 def safe_float_conversion(value):
     """Safely convert value to float, return 0 if conversion fails"""
